@@ -33,7 +33,7 @@ public class CodeGenerationService {
     public String generateAndSaveCode(String message) throws NoApiKeyException, InputRequiredException {
         GenerationResult code = generateCode(message);
 
-        String content = code.getOutput().getChoices().get(0).getMessage().getContent();
+        String content = code.getOutput().getChoices().getFirst().getMessage().getContent();
         logger.info(content);
 
         // Split the content into text and Java code.
@@ -87,9 +87,7 @@ public class CodeGenerationService {
 
     public ResponseEntity<Object> convertExcel2Markdown(String filePath) throws Exception {
 
-        //            conver excel to markdown
-        //             使用默认凭证初始化Credentials Client.
-        com.aliyun.credentials.Client credentialClient = new com.aliyun.credentials.Client();
+        // 创建Client实例并设置配置
 
         Config config = new Config()
                 .setAccessKeyId(CredentialConstants.ACCESS_KEY_ID)
