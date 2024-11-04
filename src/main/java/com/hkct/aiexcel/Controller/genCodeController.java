@@ -63,7 +63,7 @@ public class genCodeController {
             logger.info(content);
 
 
-            // Split the content into text and Java code
+            // Split the content into text and Java code.
             String[] parts = content.split("```java");
             String text = parts[0].trim();
             String javaCode = parts[1].split("```")[0].trim();
