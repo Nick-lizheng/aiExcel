@@ -25,9 +25,10 @@ public class genCodeController {
 
 
     @PostMapping(value = PathConstants.IMPORT_EXCEL, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> handleFileUpload(@ModelAttribute FileUploadRequest request) throws Exception {
+    public ResponseEntity<Object> genCode(@ModelAttribute FileUploadRequest request) throws Exception {
         logger.info("************************************* Start to import excel *************************************");
         MultipartFile file = request.getFile();
+
         String message = request.getMessage();
         try {
             //excel to markdown
