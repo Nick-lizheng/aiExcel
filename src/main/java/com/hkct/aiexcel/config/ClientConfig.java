@@ -1,8 +1,8 @@
-package com.hkct.aiexcel.Config;
+package com.hkct.aiexcel.config;
 
 import com.aliyun.docmind_api20220711.Client;
 import com.aliyun.teaopenapi.models.Config;
-import com.hkct.aiexcel.Constants.CredentialConstants;
+import com.hkct.aiexcel.constants.CredentialConstants;
 
 public class ClientConfig {
 

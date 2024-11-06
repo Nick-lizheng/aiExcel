@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.Constants;
+package com.hkct.aiexcel.constants;
 
 public class PathConstants {
 

@@ -1,24 +1,27 @@
-package com.hkct.aiexcel.Controller;
+package com.hkct.aiexcel.controller;
 
 
-import com.hkct.aiexcel.Constants.PathConstants;
+import com.hkct.aiexcel.config.StartupConfig;
+import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.model.response.FileUploadRequest;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.hkct.aiexcel.Service.CodeGenerationService;
+import com.hkct.aiexcel.service.CodeGenerationService;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.util.logging.Logger;
+
 
 @RestController
 @RequestMapping("/api")
-public class genCodeController {
+public class GenCodeController {
 
-    Logger logger = Logger.getLogger("com.hkct.aiexcelsystem.Controller.genCodeController");
+    Logger logger = org.slf4j.LoggerFactory.getLogger(GenCodeController.class);
+
 
     @Autowired
     private CodeGenerationService codeGenerationService;
