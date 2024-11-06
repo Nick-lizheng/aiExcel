@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.Config.ClientConfig;
 import com.hkct.aiexcel.Constants.PathConstants;
 import com.hkct.aiexcel.Constants.CredentialConstants;
+import com.hkct.aiexcel.Constants.PromptConstants;
 import com.hkct.aiexcel.Service.CodeGenerationService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,7 +67,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         Message userMsg = Message.builder()
                 .role(Role.USER.getValue())
-                .content( markdown + message )
+                .content( markdown + message + PromptConstants.prompt)
                 .build();
 
         GenerationParam param = GenerationParam.builder()
