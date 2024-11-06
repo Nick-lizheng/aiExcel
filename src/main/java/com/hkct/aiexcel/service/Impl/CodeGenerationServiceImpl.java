@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.Service.Impl;
+package com.hkct.aiexcel.service.Impl;
 
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
@@ -12,11 +12,13 @@ import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobAdvance
 import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobResponse;
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hkct.aiexcel.Config.ClientConfig;
-import com.hkct.aiexcel.Constants.PathConstants;
-import com.hkct.aiexcel.Constants.CredentialConstants;
-import com.hkct.aiexcel.Constants.PromptConstants;
-import com.hkct.aiexcel.Service.CodeGenerationService;
+import com.hkct.aiexcel.config.ClientConfig;
+import com.hkct.aiexcel.config.StartupConfig;
+import com.hkct.aiexcel.constants.PathConstants;
+import com.hkct.aiexcel.constants.CredentialConstants;
+import com.hkct.aiexcel.constants.PromptConstants;
+import com.hkct.aiexcel.service.CodeGenerationService;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,12 +26,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.logging.Logger;
+
 
 @Service
 public class CodeGenerationServiceImpl implements CodeGenerationService {
 
-    Logger logger = Logger.getLogger(CodeGenerationService.class.getName());
+    Logger logger = org.slf4j.LoggerFactory.getLogger(CodeGenerationServiceImpl.class);
 
     public String generateAndSaveCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
         logger.info("************************************* Start to generate code *************************************");
@@ -46,7 +48,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         if (parts.length > 1) {
             javaCode = parts[1].split("```")[0].trim();
         } else {
-            logger.warning("No Java code found in the generated content.");
+            logger.error("No Java code found in the generated content.");
         }
 
         // Save Java code to a file
