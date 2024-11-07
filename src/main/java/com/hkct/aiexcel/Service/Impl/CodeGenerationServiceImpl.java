@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.service.Impl;
+package com.hkct.aiexcel.Service.Impl;
 
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
@@ -12,26 +12,23 @@ import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobAdvance
 import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobResponse;
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hkct.aiexcel.config.ClientConfig;
-import com.hkct.aiexcel.config.StartupConfig;
-import com.hkct.aiexcel.constants.PathConstants;
+import com.hkct.aiexcel.Config.ClientConfig;
 import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
-import com.hkct.aiexcel.service.CodeGenerationService;
-import org.slf4j.Logger;
+import com.hkct.aiexcel.Service.CodeGenerationService;
+import com.hkct.aiexcel.Utils.CommonOssUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
-
+import java.util.logging.Logger;
 
 @Service
 public class CodeGenerationServiceImpl implements CodeGenerationService {
 
-    Logger logger = org.slf4j.LoggerFactory.getLogger(CodeGenerationServiceImpl.class);
+    Logger logger = Logger.getLogger(CodeGenerationService.class.getName());
 
     public String generateAndSaveCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
         logger.info("************************************* Start to generate code *************************************");
@@ -44,15 +41,15 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         String[] parts = content.split("```java");
         String text = parts[0].trim();
         String javaCode = "";
-
+        String objectName = "User00001.java";
         if (parts.length > 1) {
             javaCode = parts[1].split("```")[0].trim();
         } else {
-            logger.error("No Java code found in the generated content.");
+            logger.warning("No Java code found in the generated content.");
         }
-
+        CommonOssUtils.saveJavaCodeToOss(javaCode, objectName);
         // Save Java code to a file
-        saveJavaCodeToFile(javaCode, PathConstants.PATH, "GeneratedCode.java");
+        //saveJavaCodeToFile(javaCode, PathConstants.PATH, "GeneratedCode.java");
         logger.info("************************************* End to generate code *************************************");
 
         return text;
@@ -82,13 +79,13 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return gen.call(param);
     }
 
-    private void saveJavaCodeToFile(String javaCode, String path, String fileName) {
-        try (FileWriter fileWriter = new FileWriter(path + fileName)) {
-            fileWriter.write(javaCode);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void saveJavaCodeToFile(String javaCode, String path, String fileName) {
+//        try (FileWriter fileWriter = new FileWriter(path + fileName)) {
+//            fileWriter.write(javaCode);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public String convertExcel2Markdown(MultipartFile file) throws Exception {
         logger.info("************************************* Start to convert excel to markdown *************************************");
@@ -96,15 +93,12 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         // Use the ClientConfig to create the client
         Client client = ClientConfig.createClient();
-
         // 创建RuntimeObject实例并设置运行参数
         RuntimeOptions runtime = new RuntimeOptions();
         SubmitDigitalDocStructureJobAdvanceRequest request = new SubmitDigitalDocStructureJobAdvanceRequest();
         request.fileUrlObject = file.getInputStream();
         request.fileName = file.getOriginalFilename();
         request.revealMarkdown = true;
-
-
         // 发起请求并处理应答或异常。
         SubmitDigitalDocStructureJobResponse response = client.submitDigitalDocStructureJobAdvance(request, runtime);
 

@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.service;
+package com.hkct.aiexcel.Service;
 
 import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;

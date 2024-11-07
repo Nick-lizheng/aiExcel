@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.config;
+package com.hkct.aiexcel.Config;
 
 import com.aliyun.docmind_api20220711.Client;
 import com.aliyun.teaopenapi.models.Config;

@@ -1,27 +1,25 @@
-package com.hkct.aiexcel.controller;
+package com.hkct.aiexcel.Controller;
 
 
-import com.hkct.aiexcel.config.StartupConfig;
 import com.hkct.aiexcel.constants.PathConstants;
+import com.hkct.aiexcel.Utils.CommonOssUtils;
 import com.hkct.aiexcel.model.response.FileUploadRequest;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.hkct.aiexcel.service.CodeGenerationService;
+import com.hkct.aiexcel.Service.CodeGenerationService;
 import org.springframework.web.multipart.MultipartFile;
 
 
-
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api")
-public class GenCodeController {
+public class genCodeController {
 
-    Logger logger = org.slf4j.LoggerFactory.getLogger(GenCodeController.class);
-
+    Logger logger = Logger.getLogger("com.hkct.aiexcelsystem.Controller.genCodeController");
 
     @Autowired
     private CodeGenerationService codeGenerationService;
@@ -39,7 +37,6 @@ public class GenCodeController {
 
             //markdown to code
             String text = codeGenerationService.generateAndSaveCode(markdown, message);
-
             logger.info("************************************* End to import excel *************************************");
             return new ResponseEntity<>(text, HttpStatus.OK);
 
