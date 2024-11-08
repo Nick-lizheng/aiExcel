@@ -61,7 +61,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         Message systemMsg = Message.builder()
                 .role(Role.SYSTEM.getValue())
-                .content("You are a helpful assistant.")
+                .content(PromptConstants.SYSTEM_PROMPT)
                 .build();
 
         Message userMsg = Message.builder()
