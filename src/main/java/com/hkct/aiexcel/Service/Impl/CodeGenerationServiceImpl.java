@@ -39,7 +39,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         // Split the content into text and Java code.
         String[] parts = content.split("```java");
-        String text = parts[0].trim();
+//        String text = parts[0].trim();
         String javaCode = "";
         String objectName = "User00001.java";
         if (parts.length > 1) {
@@ -52,7 +52,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         //saveJavaCodeToFile(javaCode, PathConstants.PATH, "GeneratedCode.java");
         logger.info("************************************* End to generate code *************************************");
 
-        return text;
+        return content;
     }
 
     private GenerationResult generateCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
