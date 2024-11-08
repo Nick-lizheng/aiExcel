@@ -2,7 +2,7 @@ package com.hkct.aiexcel.constants;
 
 public class PromptConstants {
 
-    public static final String prompt = "任务指令：根据已解析成Markdown格式的Excel文件内容，编写Java代码以执行刚刚我描述的Excel操作，并生成新的Excel文档。\n\n" +
+    public static final String USER_PROMPT = "任务指令：根据已解析成Markdown格式的Excel文件内容，编写Java代码以执行刚刚我描述的Excel操作，并生成新的Excel文档。\n\n" +
             "背景信息：\n" +
             "- 原始Excel文件路径: '" + PathConstants.ORIGINAL_EXCEL_PATH + "'\n" +
             "- 目标输出Excel文件路径: '" + PathConstants.OUTPUT_EXCEL_PATH + "'\n\n" +
@@ -18,6 +18,36 @@ public class PromptConstants {
             "请基于上述要求生成详细的Java代码示例。如果还有其他特定需求或者偏好（例如使用特定库来处理Excel），请通过设置以下变量告知：\n" +
             "- `${preferred_library_for_excel_handling}` (例如Apache POI, JXL等)\n" +
             "- `${additional_requirements}` (如果有额外的需求或限制条件)";
+
+
+
+
+
+    public static final String DEPENDENCIES_PROMPT = "```xml\n" +
+            "<dependencies>\n" +
+            "    <dependency>\n" +
+            "        <groupId>org.apache.poi</groupId>\n" +
+            "        <artifactId>poi</artifactId>\n" +
+            "        <version>5.2.3</version>\n" +
+            "    </dependency>\n" +
+            "    <dependency>\n" +
+            "        <groupId>org.apache.poi</groupId>\n" +
+            "        <artifactId>poi-ooxml</artifactId>\n" +
+            "        <version>5.2.3</version>\n" +
+            "    </dependency>\n" +
+            "</dependencies>\n" +
+            "```.";
+
+
+    public static final String SYSTEM_PROMPT = "你是一名专门解决银行中Excel相关问题的AI助手。\n" +
+            "用户已经添加了必要的依赖，如下所示" + DEPENDENCIES_PROMPT + "\n" +
+            "所以不需要向用户返回依赖内容，你只需要专注于生成代码。\n" +
+            "另外，请以Markdown格式提供结果预览。\n" +
+            "预览的标题为'### 预览结果'，内容为生成的Excel文件的前10行数据。";
+
+
+
+
 
 
 }

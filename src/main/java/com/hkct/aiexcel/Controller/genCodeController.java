@@ -2,8 +2,8 @@ package com.hkct.aiexcel.Controller;
 
 
 import com.hkct.aiexcel.constants.PathConstants;
-import com.hkct.aiexcel.Utils.CommonOssUtils;
-import com.hkct.aiexcel.model.response.FileUploadRequest;
+import com.hkct.aiexcel.model.request.FileUploadRequest;
+import com.hkct.aiexcel.model.respones.SubmitRespones;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,13 +30,13 @@ public class genCodeController {
         logger.info("************************************* Start to import excel *************************************");
         MultipartFile file = request.getFile();
 
-        String message = request.getMessage();
+        String message = request.getInstruction();
         try {
             //excel to markdown
             String markdown = codeGenerationService.convertExcel2Markdown(file);
 
             //markdown to code
-            String text = codeGenerationService.generateAndSaveCode(markdown, message);
+            SubmitRespones text = codeGenerationService.generateAndSaveCode(markdown, message);
             logger.info("************************************* End to import excel *************************************");
             return new ResponseEntity<>(text, HttpStatus.OK);
 

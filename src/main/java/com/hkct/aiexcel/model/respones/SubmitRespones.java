@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.model.response;
+package com.hkct.aiexcel.model.respones;
 
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,8 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FileUploadRequest {
-    private MultipartFile file;
+public class SubmitRespones {
+
+
+    private String template_id;
     private String message;
+
 
 }
