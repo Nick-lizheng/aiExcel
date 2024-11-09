@@ -13,18 +13,20 @@ import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobRespons
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.Config.ClientConfig;
+import com.hkct.aiexcel.Service.CodeGenerationService;
+import com.hkct.aiexcel.Utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
-import com.hkct.aiexcel.Service.CodeGenerationService;
-import com.hkct.aiexcel.Utils.CommonOssUtils;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
+import javassist.ClassPool;
+import javassist.CtClass;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -34,7 +36,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
     Logger logger = Logger.getLogger(CodeGenerationService.class.getName());
 
-    public SubmitRespones generateAndSaveCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
+    public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
         logger.info("************************************* Start to generate code *************************************");
         GenerationResult code = generateCode(markdown, message);
 
@@ -43,7 +45,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         // Split the content into text and Java code.
         String[] parts = content.split("```java");
-        String text ="";
+        String text = "";
         String javaCode = "";
         String objectName = "User00001.java";
         if (parts.length > 1) {
@@ -57,11 +59,27 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         saveJavaCodeToFile(javaCode, PathConstants.PATH, "GeneratedCode.java");
         logger.info("************************************* End to generate code *************************************");
 
+        logger.info("compile java file");
+        JavaToClassFile.compileToClassFile("./gen_src_code/TestJava.java");
+        logger.info("load class and run to generate excel");
+        loadClassAndGebExcel("./TestJava");
+
 
         return SubmitRespones.builder()
                 .message(text)
                 .template_id("GeneratedCode.java")
                 .build();
+    }
+
+    public void loadClassAndGebExcel(String classPath) throws Exception {
+        ClassPool pool = ClassPool.getDefault();
+        pool.insertClassPath(classPath);
+
+        CtClass ctClass = pool.get("TestJava");
+        Class<?> aClass = ctClass.toClass();
+        Method method = aClass.getMethod("main", String[].class);
+        Object mainArgs = new String[]{};
+        method.invoke(null, mainArgs);
     }
 
     private GenerationResult generateCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
@@ -75,7 +93,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         Message userMsg = Message.builder()
                 .role(Role.USER.getValue())
-                .content( markdown + message + PromptConstants.USER_PROMPT)
+                .content(markdown + message + PromptConstants.USER_PROMPT)
                 .build();
 
         GenerationParam param = GenerationParam.builder()
@@ -88,12 +106,14 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return gen.call(param);
     }
 
-    private void saveJavaCodeToFile(String javaCode, String path, String fileName) {
+    private String saveJavaCodeToFile(String javaCode, String path, String fileName) {
         try (FileWriter fileWriter = new FileWriter(path + fileName)) {
             fileWriter.write(javaCode);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
+        return path + fileName;
     }
 
     public String convertExcel2Markdown(MultipartFile file) throws Exception {
