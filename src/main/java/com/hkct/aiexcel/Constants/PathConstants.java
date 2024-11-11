@@ -8,10 +8,12 @@ public class PathConstants {
 
 
     //for Excel source path
-    public static final String ORIGINAL_EXCEL_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "hackathon" + File.separator + "excelSource" + File.separator + "latest_10min_wind.xlsx";
+//    public static final String ORIGINAL_EXCEL_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "hackathon" + File.separator + "excelSource" + File.separator + "latest_10min_wind.xlsx";
+    public static final String ORIGINAL_EXCEL_PATH = "./excel_file/latest_10min_wind.xlsx";
 
     //for Excel output path
-    public static final String OUTPUT_EXCEL_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "hackathon" + File.separator + "excelSource" + File.separator + "output.xlsx";
+//    public static final String OUTPUT_EXCEL_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "hackathon" + File.separator + "excelSource" + File.separator + "output.xlsx";
+    public static final String OUTPUT_EXCEL_PATH = "./excel_file/output.xlsx";
 
 
 
