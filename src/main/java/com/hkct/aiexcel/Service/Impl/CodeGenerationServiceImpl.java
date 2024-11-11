@@ -14,9 +14,9 @@ import com.aliyun.teautil.models.RuntimeOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.Config.ClientConfig;
 import com.hkct.aiexcel.Service.CodeGenerationService;
+
 import com.hkct.aiexcel.Utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
-import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import javassist.ClassPool;
@@ -30,6 +30,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
+
+
 
 @Service
 public class CodeGenerationServiceImpl implements CodeGenerationService {
@@ -56,13 +58,13 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         }
 //        CommonOssUtils.saveJavaCodeToOss(javaCode, objectName);
         // Save Java code to a file
-        saveJavaCodeToFile(javaCode, PathConstants.PATH, "GeneratedCode.java");
+        saveJavaCodeToFile(javaCode, "./gen_src_code/", "ExcelModifier.java");
         logger.info("************************************* End to generate code *************************************");
 
         logger.info("compile java file");
-        JavaToClassFile.compileToClassFile("./gen_src_code/TestJava.java");
+        JavaToClassFile.compileToClassFile("./gen_src_code/ExcelModifier.java");
         logger.info("load class and run to generate excel");
-        loadClassAndGebExcel("./TestJava");
+        loadClassAndGebExcel("./gen_src_code");
 
 
         return SubmitRespones.builder()
@@ -75,7 +77,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         ClassPool pool = ClassPool.getDefault();
         pool.insertClassPath(classPath);
 
-        CtClass ctClass = pool.get("TestJava");
+        CtClass ctClass = pool.get("ExcelModifier");
         Class<?> aClass = ctClass.toClass();
         Method method = aClass.getMethod("main", String[].class);
         Object mainArgs = new String[]{};
