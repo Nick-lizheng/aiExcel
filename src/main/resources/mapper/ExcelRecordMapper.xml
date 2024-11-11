@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hkct.aiexcel.mapper.ExcelRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.hkct.aiexcel.entity.ExcelRecord">
+        <id property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="compliedClassPath" column="complied_class_path" jdbcType="VARCHAR"/>
+        <result property="outputExcelPath" column="output_excel_path" jdbcType="VARCHAR"/>
+        <result property="createTimestamp" column="create_timestamp" jdbcType="DATE"/>
+        <result property="updateTimestamp" column="update_timestamp" jdbcType="DATE"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="templateName" column="template_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,complied_class_path,output_excel_path,
+        create_timestamp,update_timestamp,status,
+        template_name
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from excel_record
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from excel_record
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.hkct.aiexcel.entity.ExcelRecord"
+            useGeneratedKeys="true">
+        insert into excel_record
+        ( id, complied_class_path, output_excel_path
+        , create_timestamp, update_timestamp, status
+        , template_name)
+        values ( #{id,jdbcType=VARCHAR}, #{compliedClassPath,jdbcType=VARCHAR}, #{outputExcelPath,jdbcType=VARCHAR}
+               , #{createTimestamp,jdbcType=DATE}, #{updateTimestamp,jdbcType=DATE}, #{status,jdbcType=VARCHAR}
+               , #{templateName,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.hkct.aiexcel.entity.ExcelRecord"
+            useGeneratedKeys="true">
+        insert into excel_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="compliedClassPath != null">complied_class_path,</if>
+            <if test="outputExcelPath != null">output_excel_path,</if>
+            <if test="createTimestamp != null">create_timestamp,</if>
+            <if test="updateTimestamp != null">update_timestamp,</if>
+            <if test="status != null">status,</if>
+            <if test="templateName != null">template_name,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id,jdbcType=VARCHAR},</if>
+            <if test="compliedClassPath != null">#{compliedClassPath,jdbcType=VARCHAR},</if>
+            <if test="outputExcelPath != null">#{outputExcelPath,jdbcType=VARCHAR},</if>
+            <if test="createTimestamp != null">#{createTimestamp,jdbcType=DATE},</if>
+            <if test="updateTimestamp != null">#{updateTimestamp,jdbcType=DATE},</if>
+            <if test="status != null">#{status,jdbcType=VARCHAR},</if>
+            <if test="templateName != null">#{templateName,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hkct.aiexcel.entity.ExcelRecord">
+        update excel_record
+        <set>
+            <if test="compliedClassPath != null">
+                complied_class_path = #{compliedClassPath,jdbcType=VARCHAR},
+            </if>
+            <if test="outputExcelPath != null">
+                output_excel_path = #{outputExcelPath,jdbcType=VARCHAR},
+            </if>
+            <if test="createTimestamp != null">
+                create_timestamp = #{createTimestamp,jdbcType=DATE},
+            </if>
+            <if test="updateTimestamp != null">
+                update_timestamp = #{updateTimestamp,jdbcType=DATE},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="templateName != null">
+                template_name = #{templateName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hkct.aiexcel.entity.ExcelRecord">
+        update excel_record
+        set complied_class_path = #{compliedClassPath,jdbcType=VARCHAR},
+            output_excel_path   = #{outputExcelPath,jdbcType=VARCHAR},
+            create_timestamp    = #{createTimestamp,jdbcType=DATE},
+            update_timestamp    = #{updateTimestamp,jdbcType=DATE},
+            status              = #{status,jdbcType=VARCHAR},
+            template_name       = #{templateName,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+</mapper>

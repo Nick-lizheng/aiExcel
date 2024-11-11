@@ -1,5 +1,6 @@
 package com.hkct.aiexcel.Service.Impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
@@ -14,13 +15,15 @@ import com.aliyun.teautil.models.RuntimeOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.Config.ClientConfig;
 import com.hkct.aiexcel.Service.CodeGenerationService;
-
 import com.hkct.aiexcel.Utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
+import com.hkct.aiexcel.entity.ExcelRecord;
+import com.hkct.aiexcel.mapper.ExcelRecordMapper;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import javassist.ClassPool;
 import javassist.CtClass;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,9 +35,12 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 
-
 @Service
 public class CodeGenerationServiceImpl implements CodeGenerationService {
+
+
+    @Autowired
+    private ExcelRecordMapper excelRecordMapper;
 
     Logger logger = Logger.getLogger(CodeGenerationService.class.getName());
 
@@ -65,6 +71,11 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         JavaToClassFile.compileToClassFile("./gen_src_code/ExcelModifier.java");
         logger.info("load class and run to generate excel");
         loadClassAndGebExcel("./gen_src_code");
+
+        ExcelRecord excelRecord = new ExcelRecord();
+        excelRecord.setId(IdUtil.fastUUID());
+        excelRecord.setCompliedClassPath("./gen_src_code/ExcelModifier");
+        excelRecordMapper.insert(excelRecord);
 
 
         return SubmitRespones.builder()
