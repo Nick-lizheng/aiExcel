@@ -23,16 +23,18 @@ import com.hkct.aiexcel.mapper.ExcelRecordMapper;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import javassist.ClassPool;
 import javassist.CtClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.logging.Logger;
 
 
 @Service
@@ -42,7 +44,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
     @Autowired
     private ExcelRecordMapper excelRecordMapper;
 
-    Logger logger = Logger.getLogger(CodeGenerationService.class.getName());
+    Logger logger = LoggerFactory.getLogger("com.hkct.aiexcel.Service.Impl.CodeGenerationServiceImpl");
 
     public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
         logger.info("************************************* Start to generate code *************************************");
@@ -55,12 +57,11 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         String[] parts = content.split("```java");
         String text = "";
         String javaCode = "";
-        String objectName = "User00001.java";
         if (parts.length > 1) {
             javaCode = parts[1].split("```")[0].trim();
             text = parts[1].split("```")[1].trim();
         } else {
-            logger.warning("No Java code found in the generated content.");
+            logger.error("No Java code found in the generated content.");
         }
 //        CommonOssUtils.saveJavaCodeToOss(javaCode, objectName);
         // Save Java code to a file
@@ -70,29 +71,44 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         logger.info("compile java file");
         JavaToClassFile.compileToClassFile("./gen_src_code/ExcelModifier.java");
         logger.info("load class and run to generate excel");
-        loadClassAndGebExcel("./gen_src_code");
+        String excelResponse = loadClassAndGebExcel("./gen_src_code");
 
         ExcelRecord excelRecord = new ExcelRecord();
-        excelRecord.setId(IdUtil.fastUUID());
+        String id = IdUtil.fastUUID();
+        excelRecord.setId(id);
         excelRecord.setCompliedClassPath("./gen_src_code/ExcelModifier");
         excelRecordMapper.insert(excelRecord);
 
 
         return SubmitRespones.builder()
                 .message(text)
-                .template_id("GeneratedCode.java")
+                .template_id(id)
+                .excelResponse(excelResponse)
                 .build();
     }
 
-    public void loadClassAndGebExcel(String classPath) throws Exception {
-        ClassPool pool = ClassPool.getDefault();
-        pool.insertClassPath(classPath);
+    public String loadClassAndGebExcel(String classPath) throws Exception {
+        try {
+            ClassPool pool = ClassPool.getDefault();
+            pool.insertClassPath(classPath);
 
-        CtClass ctClass = pool.get("ExcelModifier");
-        Class<?> aClass = ctClass.toClass();
-        Method method = aClass.getMethod("main", String[].class);
-        Object mainArgs = new String[]{};
-        method.invoke(null, mainArgs);
+            logger.info("Class path inserted: {}", classPath);
+
+            // 使用新的类加载器加载类
+            CtClass ctClass = pool.get("ExcelModifier");
+            ClassLoader classLoader = new java.net.URLClassLoader(new java.net.URL[]{new java.io.File(classPath).toURI().toURL()});
+            Class<?> loadedClass = ctClass.toClass(classLoader, null);
+
+            Method method = loadedClass.getMethod("main", String[].class);
+            String[] mainArgs = new String[]{};
+            method.invoke(null, (Object) mainArgs);
+            return "Class loaded and executed successfully";
+
+        } catch (Exception e) {
+            logger.error("Error loading class and generating Excel: {}", e);
+            return "Error loading class and generating Excel: " + e.getMessage();
+        }
+
     }
 
     private GenerationResult generateCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {

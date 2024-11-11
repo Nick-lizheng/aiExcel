@@ -14,6 +14,7 @@ public class SubmitRespones {
 
     private String template_id;
     private String message;
+    private String excelResponse;
 
 
 }
