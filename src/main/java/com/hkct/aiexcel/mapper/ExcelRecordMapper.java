@@ -17,10 +17,12 @@ public interface ExcelRecordMapper extends BaseMapper<ExcelRecord> {
 
     int insertSelective(ExcelRecord record);
 
-    ExcelRecord selectByPrimaryKey(Long id);
+    ExcelRecord selectByPrimaryKey(String id);
 
     int updateByPrimaryKeySelective(ExcelRecord record);
 
     int updateByPrimaryKey(ExcelRecord record);
+
+    int updateStatus(ExcelRecord record);
 
 }
