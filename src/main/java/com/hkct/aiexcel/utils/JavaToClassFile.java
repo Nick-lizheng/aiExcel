@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.Utils;
+package com.hkct.aiexcel.utils;
 
 import javax.tools.*;
 import java.io.File;

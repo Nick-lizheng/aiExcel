@@ -1,7 +1,8 @@
-package com.hkct.aiexcel.Controller;
+package com.hkct.aiexcel.controller;
 
 
 import com.hkct.aiexcel.constants.PathConstants;
+import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,15 +10,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.hkct.aiexcel.Service.CodeGenerationService;
+import com.hkct.aiexcel.service.CodeGenerationService;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.util.List;
 import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api")
-public class genCodeController {
+public class GenCodeController {
 
     Logger logger = Logger.getLogger("com.hkct.aiexcelsystem.Controller.genCodeController");
 
@@ -44,6 +46,14 @@ public class genCodeController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @PostMapping(value = PathConstants.SELECT_EXCEL)
+    public ResponseEntity<List<ExcelRecord>> selectTemplate(@RequestBody ExcelRecord request) throws Exception {
+        try {
+            List<ExcelRecord> record = codeGenerationService.selectTemplate(request);
+            return new ResponseEntity<>(record, HttpStatus.OK);
 
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);       }
+    }
 
 }
