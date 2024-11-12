@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -58,8 +59,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
     public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
         logger.info("************************************* Start to generate code *************************************");
         PromptConstants.PROMPT = updateExcelName();
-        System.out.println(PromptConstants.PROMPT);
-        System.out.println(PromptConstants.getUserPrompt());
+
         GenerationResult code = generateCode(markdown, message);
 
         String content = code.getOutput().getChoices().get(0).getMessage().getContent();
@@ -91,7 +91,8 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         String id = IdUtil.fastUUID();
         excelRecord.setId(id);
         excelRecord.setCompliedClassPath("./gen_src_code/"+PromptConstants.PROMPT);
-        excelRecord.setCreateTimestamp(new Date());
+        System.out.println(new Date());
+        excelRecord.setCreateTimestamp(LocalDateTime.now());
         excelRecordMapper.insert(excelRecord);
 
 
