@@ -59,6 +59,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
     public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
         logger.info("************************************* Start to generate code *************************************");
         PromptConstants.PROMPT = updateExcelName();
+        System.out.println("print for user prompt: "+PromptConstants.PROMPT);
 
         GenerationResult code = generateCode(markdown, message);
 
