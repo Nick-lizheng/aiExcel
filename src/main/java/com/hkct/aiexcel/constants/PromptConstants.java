@@ -5,7 +5,7 @@ public class PromptConstants {
     public static String PROMPT;
     public static String USER_PROMPT;
     public static String getUserPrompt() {
-        if (USER_PROMPT == null) {
+//        if (USER_PROMPT == null) {
             USER_PROMPT =
                     "任务指令：根据已解析成Markdown格式的Excel文件内容，编写Java代码以执行刚刚我描述的Excel操作，并生成新的Excel文档。\n\n" +
                             "背景信息：\n" +
@@ -24,7 +24,7 @@ public class PromptConstants {
                             "请基于上述要求生成详细的Java代码示例。如果还有其他特定需求或者偏好（例如使用特定库来处理Excel），请通过设置以下变量告知：\n" +
                             "- `${preferred_library_for_excel_handling}` (例如Apache POI, JXL等)\n" +
                             "- `${additional_requirements}` (如果有额外的需求或限制条件)";
-        }
+//        }
         return USER_PROMPT;
     }
 //    public static  String USER_PROMPT = "任务指令：根据已解析成Markdown格式的Excel文件内容，编写Java代码以执行刚刚我描述的Excel操作，并生成新的Excel文档。\n\n" +
@@ -69,7 +69,7 @@ public class PromptConstants {
             "用户已经添加了必要的依赖，如下所示" + DEPENDENCIES_PROMPT + "\n" +
             "所以不需要向用户返回依赖内容，你只需要专注于生成代码。\n" +
             "另外，请以Markdown格式提供结果预览。\n" +
-            "预览的标题为'### 预览结果'，内容为生成的Excel文件的前10行数据。";
+            "预览的标题为'### 预览结果'，内容为生成的Excel文件的所有行数据。";
 
 
 
