@@ -37,7 +37,7 @@ public class JavaToClassFile {
         );
 
         JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
-        boolean success = task.call();
+        task.call();
 
         for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
             System.out.println(diagnostic.getMessage(null));

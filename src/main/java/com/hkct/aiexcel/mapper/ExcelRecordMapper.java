@@ -11,7 +11,7 @@ import com.hkct.aiexcel.entity.ExcelRecord;
  */
 public interface ExcelRecordMapper extends BaseMapper<ExcelRecord> {
 
-    int deleteByPrimaryKey(Long id);
+    int deleteByPrimaryKey(String id);
 
     int insert(ExcelRecord record);
 
@@ -22,5 +22,7 @@ public interface ExcelRecordMapper extends BaseMapper<ExcelRecord> {
     int updateByPrimaryKeySelective(ExcelRecord record);
 
     int updateByPrimaryKey(ExcelRecord record);
+
+    int updateStatus(ExcelRecord record);
 
 }

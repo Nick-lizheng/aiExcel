@@ -28,7 +28,7 @@
         where id = #{id,jdbcType=VARCHAR}
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
         delete
         from excel_record
         where id = #{id,jdbcType=VARCHAR}
@@ -98,5 +98,11 @@
             status              = #{status,jdbcType=VARCHAR},
             template_name       = #{templateName,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateStatus" parameterType="com.hkct.aiexcel.entity.ExcelRecord">
+        UPDATE excel_record
+        SET status = #{status}
+        WHERE id = #{id}
     </update>
 </mapper>

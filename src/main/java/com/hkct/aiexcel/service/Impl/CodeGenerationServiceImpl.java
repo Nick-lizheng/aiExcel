@@ -24,6 +24,7 @@ import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
 import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.mapper.ExcelRecordMapper;
+import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -124,8 +125,6 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
     }
 
     private GenerationResult generateCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
-        //增加file序号
-        System.out.println("查看===="+PromptConstants.getUserPrompt());
         Generation gen = new Generation();
         com.alibaba.dashscope.utils.Constants.apiKey = CredentialConstants.APIKEY;
 
@@ -255,5 +254,32 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         } catch (Exception e) {
             throw new Exception("Error processing the file: " + e.getMessage(), e);
         }
+
+
+    }
+
+
+    /**
+     * generate an excel and return the path
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public String reGen(FileUploadRequest request) throws Exception {
+        String templateId = request.getTemplate_id();
+        ExcelRecord excelRecord = excelRecordMapper.selectByPrimaryKey(templateId);
+
+        String compliedClassPath = excelRecord.getCompliedClassPath();
+
+        int slashIndex = compliedClassPath.lastIndexOf("/");
+        String classPath = compliedClassPath.substring(0, slashIndex);
+        String className = compliedClassPath.substring(slashIndex + 1);
+
+        loadClassAndGebExcel(classPath, className);
+
+        return "./excel_file/output.xlsx";
+
+
     }
 }
