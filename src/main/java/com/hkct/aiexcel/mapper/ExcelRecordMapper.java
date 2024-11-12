@@ -23,4 +23,6 @@ public interface ExcelRecordMapper extends BaseMapper<ExcelRecord> {
 
     int updateByPrimaryKey(ExcelRecord record);
 
+    int updateStatus(ExcelRecord record);
+
 }

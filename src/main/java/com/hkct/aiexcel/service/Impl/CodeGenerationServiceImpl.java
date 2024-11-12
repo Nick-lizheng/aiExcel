@@ -1,4 +1,4 @@
-package com.hkct.aiexcel.Service.Impl;
+package com.hkct.aiexcel.service.Impl;
 
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.dashscope.aigc.generation.Generation;
@@ -12,10 +12,13 @@ import com.aliyun.docmind_api20220711.Client;
 import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobAdvanceRequest;
 import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobResponse;
 import com.aliyun.teautil.models.RuntimeOptions;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hkct.aiexcel.Config.ClientConfig;
-import com.hkct.aiexcel.Service.CodeGenerationService;
-import com.hkct.aiexcel.Utils.JavaToClassFile;
+import com.hkct.aiexcel.config.ClientConfig;
+import com.hkct.aiexcel.service.CodeGenerationService;
+import com.hkct.aiexcel.utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
 import com.hkct.aiexcel.entity.ExcelRecord;
@@ -34,6 +37,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -145,6 +149,24 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return path + fileName;
     }
 
+    /**
+     * selectTemplate
+     * @param request
+     * @return
+     */
+    @Override
+    public List<ExcelRecord> selectTemplate(ExcelRecord request) {
+        if(request == null || StringUtils.isBlank(request.getStatus())){
+            return null;
+        }
+        QueryWrapper<ExcelRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", request.getStatus());
+        List<ExcelRecord> list = excelRecordMapper.selectList(wrapper);
+        if(CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        return list;
+    }
     public String convertExcel2Markdown(MultipartFile file) throws Exception {
         logger.info("************************************* Start to convert excel to markdown *************************************");
 

@@ -99,4 +99,10 @@
             template_name       = #{templateName,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>
+
+    <update id="updateStatus" parameterType="com.hkct.aiexcel.entity.ExcelRecord">
+        UPDATE excel_record
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
 </mapper>

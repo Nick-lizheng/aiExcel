@@ -1,8 +1,8 @@
-package com.hkct.aiexcel.Controller;
+package com.hkct.aiexcel.controller;
 
 
-import com.hkct.aiexcel.Service.CodeGenerationService;
 import com.hkct.aiexcel.constants.PathConstants;
+import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +11,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.hkct.aiexcel.service.CodeGenerationService;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -24,7 +28,7 @@ import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api")
-public class genCodeController {
+public class GenCodeController {
 
     Logger logger = Logger.getLogger("com.hkct.aiexcelsystem.Controller.genCodeController");
 
@@ -64,6 +68,14 @@ public class genCodeController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @PostMapping(value = PathConstants.SELECT_EXCEL)
+    public ResponseEntity<List<ExcelRecord>> selectTemplate(@RequestBody ExcelRecord request) throws Exception {
+        try {
+            List<ExcelRecord> record = codeGenerationService.selectTemplate(request);
+            return new ResponseEntity<>(record, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);       }
+    }
 
     // @PostMapping(PathConstants.RE_GEN)
     // public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
@@ -73,6 +85,5 @@ public class genCodeController {
     //
     //     return new ResponseEntity<>(text, HttpStatus.OK);
     // }
-
 
 }
