@@ -28,7 +28,7 @@
         where id = #{id,jdbcType=VARCHAR}
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
         delete
         from excel_record
         where id = #{id,jdbcType=VARCHAR}

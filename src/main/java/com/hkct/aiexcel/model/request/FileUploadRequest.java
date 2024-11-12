@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class FileUploadRequest {
     private MultipartFile file;
-    private String userId;
+    private String template_id;
     private String instruction;
 
 }
