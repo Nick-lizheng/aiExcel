@@ -21,7 +21,7 @@
         template_name
     </sql>
 
-    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from excel_record
@@ -98,5 +98,11 @@
             status              = #{status,jdbcType=VARCHAR},
             template_name       = #{templateName,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateStatus" parameterType="com.hkct.aiexcel.entity.ExcelRecord">
+        UPDATE excel_record
+        SET status = #{status}
+        WHERE id = #{id}
     </update>
 </mapper>
