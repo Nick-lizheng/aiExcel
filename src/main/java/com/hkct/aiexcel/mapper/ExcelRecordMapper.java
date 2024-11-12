@@ -11,13 +11,13 @@ import com.hkct.aiexcel.entity.ExcelRecord;
  */
 public interface ExcelRecordMapper extends BaseMapper<ExcelRecord> {
 
-    int deleteByPrimaryKey(Long id);
+    int deleteByPrimaryKey(String id);
 
     int insert(ExcelRecord record);
 
     int insertSelective(ExcelRecord record);
 
-    ExcelRecord selectByPrimaryKey(Long id);
+    ExcelRecord selectByPrimaryKey(String id);
 
     int updateByPrimaryKeySelective(ExcelRecord record);
 

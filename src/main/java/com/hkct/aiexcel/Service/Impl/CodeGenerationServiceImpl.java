@@ -20,6 +20,7 @@ import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
 import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.mapper.ExcelRecordMapper;
+import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -71,7 +71,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         logger.info("compile java file");
         JavaToClassFile.compileToClassFile("./gen_src_code/ExcelModifier.java");
         logger.info("load class and run to generate excel");
-        String excelResponse = loadClassAndGebExcel("./gen_src_code");
+        String excelResponse = loadClassAndGebExcel("./gen_src_code", "ExcelModifier");
 
         ExcelRecord excelRecord = new ExcelRecord();
         String id = IdUtil.fastUUID();
@@ -87,15 +87,15 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
                 .build();
     }
 
-    public String loadClassAndGebExcel(String classPath) throws Exception {
+    public String loadClassAndGebExcel(String classPath, String className) throws Exception {
         try {
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(classPath);
 
             logger.info("Class path inserted: {}", classPath);
 
-            // 使用新的类加载器加载类
-            CtClass ctClass = pool.get("ExcelModifier");
+            CtClass ctClass = pool.get(className);
+            // 创建一个新的的类加载器加载类
             ClassLoader classLoader = new java.net.URLClassLoader(new java.net.URL[]{new java.io.File(classPath).toURI().toURL()});
             Class<?> loadedClass = ctClass.toClass(classLoader, null);
 
@@ -189,6 +189,31 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         } catch (Exception e) {
             throw new Exception("Error processing the file: " + e.getMessage(), e);
         }
+
+
+    }
+
+
+    /**
+     * generate an excel and return the path
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public String reGen(FileUploadRequest request) throws Exception {
+        String templateId = request.getTemplate_id();
+        ExcelRecord excelRecord = excelRecordMapper.selectByPrimaryKey(templateId);
+
+        String compliedClassPath = excelRecord.getCompliedClassPath();
+
+        int slashIndex = compliedClassPath.lastIndexOf("/");
+        String classPath = compliedClassPath.substring(0, slashIndex);
+        String className = compliedClassPath.substring(slashIndex + 1);
+
+        loadClassAndGebExcel(classPath, className);
+
+        return "./excel_file/output.xlsx";
 
 
     }
