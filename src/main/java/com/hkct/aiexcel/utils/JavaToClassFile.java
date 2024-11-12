@@ -11,10 +11,10 @@ public class JavaToClassFile {
     public static void compileToClassFile(String sourceFilePath) {
 
         // Delete the previously compiled ExcelModifier.class file
-        File classFile = new File( "./gen_src_code/ExcelModifier.class");
-        if (classFile.exists()) {
-            classFile.delete();
-        }
+//        File classFile = new File( "./gen_src_code/ExcelModifier.class");
+//        if (classFile.exists()) {
+//            classFile.delete();
+//        }
 
         File sourceFile = new File(sourceFilePath);
 
@@ -42,6 +42,5 @@ public class JavaToClassFile {
         for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
             System.out.println(diagnostic.getMessage(null));
         }
-
     }
 }
