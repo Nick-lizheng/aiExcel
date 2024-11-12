@@ -12,6 +12,7 @@ import com.aliyun.docmind_api20220711.Client;
 import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobAdvanceRequest;
 import com.aliyun.docmind_api20220711.models.SubmitDigitalDocStructureJobResponse;
 import com.aliyun.teautil.models.RuntimeOptions;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -33,12 +34,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -52,6 +58,8 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
     public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
         logger.info("************************************* Start to generate code *************************************");
+        PromptConstants.PROMPT = updateExcelName();
+
         GenerationResult code = generateCode(markdown, message);
 
         String content = code.getOutput().getChoices().get(0).getMessage().getContent();
@@ -69,18 +77,22 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         }
 //        CommonOssUtils.saveJavaCodeToOss(javaCode, objectName);
         // Save Java code to a file
-        saveJavaCodeToFile(javaCode, "./gen_src_code/", "ExcelModifier.java");
+        String fileName = PromptConstants.PROMPT + ".java";
+        String filePathName = "./gen_src_code/"+fileName;
+        saveJavaCodeToFile(javaCode, "./gen_src_code/", fileName);
         logger.info("************************************* End to generate code *************************************");
 
         logger.info("compile java file");
-        JavaToClassFile.compileToClassFile("./gen_src_code/ExcelModifier.java");
+        JavaToClassFile.compileToClassFile(filePathName);
         logger.info("load class and run to generate excel");
-        String excelResponse = loadClassAndGebExcel("./gen_src_code", "ExcelModifier");
+        String excelResponse = loadClassAndGebExcel("./gen_src_code", PromptConstants.PROMPT);
 
         ExcelRecord excelRecord = new ExcelRecord();
         String id = IdUtil.fastUUID();
         excelRecord.setId(id);
-        excelRecord.setCompliedClassPath("./gen_src_code/ExcelModifier");
+        excelRecord.setCompliedClassPath("./gen_src_code/"+PromptConstants.PROMPT);
+        System.out.println(new Date());
+        excelRecord.setCreateTimestamp(LocalDateTime.now());
         excelRecordMapper.insert(excelRecord);
 
 
@@ -90,16 +102,14 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
                 .excelResponse(excelResponse)
                 .build();
     }
-
-    public String loadClassAndGebExcel(String classPath, String className) throws Exception {
+    public String loadClassAndGebExcel(String classPath,String filePath) throws Exception {
         try {
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(classPath);
 
             logger.info("Class path inserted: {}", classPath);
-
-            CtClass ctClass = pool.get(className);
-            // 创建一个新的的类加载器加载类
+            // 使用新的类加载器加载类
+            CtClass ctClass = pool.get(filePath);
             ClassLoader classLoader = new java.net.URLClassLoader(new java.net.URL[]{new java.io.File(classPath).toURI().toURL()});
             Class<?> loadedClass = ctClass.toClass(classLoader, null);
 
@@ -126,7 +136,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
         Message userMsg = Message.builder()
                 .role(Role.USER.getValue())
-                .content(markdown + message + PromptConstants.USER_PROMPT)
+                .content(markdown + message + PromptConstants.getUserPrompt())
                 .build();
 
         GenerationParam param = GenerationParam.builder()
@@ -139,16 +149,50 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return gen.call(param);
     }
 
+    private String updateExcelName() {
+        LambdaQueryWrapper<ExcelRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByDesc(ExcelRecord::getCreateTimestamp);
+        List<ExcelRecord> record = excelRecordMapper.selectList(queryWrapper);
+        if (CollectionUtils.isEmpty(record)){
+            return "ExcelModifier1";
+        }
+        String fileName =  record.get(0).getCompliedClassPath().substring(record.get(0).getCompliedClassPath().lastIndexOf("E"));
+        String regex = "(\\D*)(\\d+)$"; // 匹配结尾的数字部分，\\D*表示非数字部分，\\d+表示数字部分
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(fileName);
+
+        if (matcher.find()) {
+            // 获取非数字部分
+            String prefix = matcher.group(1);
+            // 获取数字部分并递增
+            int number = Integer.parseInt(matcher.group(2)) + 1;
+            // 返回递增后的字符串
+            return prefix + number;
+        } else {
+            // 如果没有找到数字，直接返回原始字符串
+            return fileName;
+        }
+    }
+
     private String saveJavaCodeToFile(String javaCode, String path, String fileName) {
-        try (FileWriter fileWriter = new FileWriter(path + fileName)) {
+        File directory = new File(path);
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
+                throw new RuntimeException("Failed to create directory: " + path);
+            }
+        }
+        // 拼接文件路径
+        String filePath = path + fileName;
+        // 写入 Java 代码到指定文件
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
             fileWriter.write(javaCode);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to save Java code to file: " + filePath, e);
         }
-        return path + fileName;
+        // 返回保存的文件路径
+        return filePath;
     }
-
     /**
      * selectTemplate
      * @param request

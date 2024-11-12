@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @TableName excel_record
@@ -16,8 +16,8 @@ public class ExcelRecord implements Serializable {
     private String id;
     private String compliedClassPath;
     private String outputExcelPath;
-    private Date createTimestamp;
-    private Date updateTimestamp;
+    private LocalDateTime createTimestamp;
+    private LocalDateTime updateTimestamp;
     private String status;
     private String templateName;
 }
