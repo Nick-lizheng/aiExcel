@@ -37,10 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,13 +45,18 @@ import java.util.regex.Pattern;
 @Service
 public class CodeGenerationServiceImpl implements CodeGenerationService {
 
+    private List<Message> conversationHistory = new ArrayList<>();
+
 
     @Autowired
     private ExcelRecordMapper excelRecordMapper;
 
     Logger logger = LoggerFactory.getLogger("com.hkct.aiexcel.Service.Impl.CodeGenerationServiceImpl");
 
-    public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
+    public SubmitRespones generateAndSaveCode(String markdown, String message,boolean newConversation) throws Exception {
+        if (newConversation) {
+            conversationHistory.clear();
+        }
         logger.info("************************************* Start to generate code *************************************");
         PromptConstants.PROMPT = updateExcelName();
         System.out.println("print for user prompt: "+PromptConstants.PROMPT);
@@ -138,14 +140,25 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
                 .content(markdown + message + PromptConstants.getUserPrompt())
                 .build();
 
+        // 仅在对话开始时添加系统消息
+        if (conversationHistory.isEmpty()) {
+            conversationHistory.add(systemMsg);
+        }
+        conversationHistory.add(userMsg);
+
         GenerationParam param = GenerationParam.builder()
                 .apiKey(com.alibaba.dashscope.utils.Constants.apiKey)
                 .model("qwen-plus")
-                .messages(Arrays.asList(systemMsg, userMsg))
+                .messages(conversationHistory)
                 .resultFormat(GenerationParam.ResultFormat.MESSAGE)
                 .build();
 
-        return gen.call(param);
+
+        GenerationResult result = gen.call(param);
+
+        conversationHistory.add(result.getOutput().getChoices().get(0).getMessage());
+
+        return result;
     }
 
     private String updateExcelName() {

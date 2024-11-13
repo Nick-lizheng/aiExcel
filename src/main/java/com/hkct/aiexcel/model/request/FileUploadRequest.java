@@ -13,5 +13,6 @@ public class FileUploadRequest {
     private MultipartFile file;
     private String template_id;
     private String instruction;
+    private boolean isNewConversation;
 
 }

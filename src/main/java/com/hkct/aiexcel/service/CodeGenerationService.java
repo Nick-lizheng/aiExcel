@@ -15,7 +15,7 @@ import java.util.List;
 public interface CodeGenerationService {
     String convertExcel2Markdown(MultipartFile file) throws Exception;
 
-    SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception;
+    SubmitRespones generateAndSaveCode(String markdown, String message,boolean newConversation) throws Exception;
 
     List<ExcelRecord> selectTemplate(ExcelRecord request);
 

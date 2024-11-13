@@ -1,6 +1,7 @@
 package com.hkct.aiexcel.controller;
 
 
+import com.alibaba.dashscope.aigc.generation.GenerationResult;
 import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
@@ -27,6 +28,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 @RestController
@@ -45,12 +47,18 @@ public class GenCodeController {
         MultipartFile file = request.getFile();
 
         String message = request.getInstruction();
+        String markdown;
         try {
             // excel to markdown
-            String markdown = codeGenerationService.convertExcel2Markdown(file);
+            if (Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
+               markdown = null;
+            }else {
+                markdown = codeGenerationService.convertExcel2Markdown(file);
+            }
+
 
             // markdown to code
-            SubmitRespones text = codeGenerationService.generateAndSaveCode(markdown, message);
+            SubmitRespones text = codeGenerationService.generateAndSaveCode(markdown, message,request.isNewConversation());
             logger.info("************************************* End to import excel *************************************");
 
             HttpHeaders headers = new HttpHeaders();
@@ -83,10 +91,8 @@ public class GenCodeController {
     }
 
     @PostMapping(value =PathConstants.RE_GEN, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> reGenExcel(@ModelAttribute FileUploadRequest request, HttpServletResponse response) throws Exception {
+    public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
         String path = codeGenerationService.reGen(request);
-
-        System.out.println("+++++++++++++++++++++++++++++++++++:  " + path);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=output.xlsx");
