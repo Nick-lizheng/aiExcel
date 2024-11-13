@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
@@ -54,7 +57,7 @@ public class GenCodeController {
             headers.add("Content-Disposition", "attachment; filename=output.xlsx");
             headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
             headers.add("template_id", text.getTemplate_id());
-            headers.add("excelResponse", text.getMessage());
+            headers.add("excelResponse", URLEncoder.encode(text.getMessage(), StandardCharsets.UTF_8.toString()));
 
 
             InputStreamResource resource =
@@ -80,8 +83,10 @@ public class GenCodeController {
     }
 
     @PostMapping(value =PathConstants.RE_GEN, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
+    public ResponseEntity<Object> reGenExcel(@ModelAttribute FileUploadRequest request, HttpServletResponse response) throws Exception {
         String path = codeGenerationService.reGen(request);
+
+        System.out.println("+++++++++++++++++++++++++++++++++++:  " + path);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=output.xlsx");
