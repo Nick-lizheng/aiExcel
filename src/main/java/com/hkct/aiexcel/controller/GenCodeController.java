@@ -79,7 +79,7 @@ public class GenCodeController {
         }
     }
 
-    @PostMapping(PathConstants.RE_GEN)
+    @PostMapping(value =PathConstants.RE_GEN, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
         String path = codeGenerationService.reGen(request);
 

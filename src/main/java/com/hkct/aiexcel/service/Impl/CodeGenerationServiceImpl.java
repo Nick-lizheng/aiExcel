@@ -106,7 +106,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(classPath);
 
-            logger.info("Class path inserted: {}", classPath);
+            logger.info("Class path : {}, ClassName: {}", classPath,filePath);
             // 使用新的类加载器加载类
             CtClass ctClass = pool.get(filePath);
             ClassLoader classLoader = new java.net.URLClassLoader(new java.net.URL[]{new java.io.File(classPath).toURI().toURL()});
