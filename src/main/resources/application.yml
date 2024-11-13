@@ -1,5 +1,7 @@
 server:
   port: 8090
+  tomcat:
+    max-http-header-size: 65535
 
 spring:
   servlet:
