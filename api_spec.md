@@ -37,7 +37,7 @@ request Body:
 ````shell
 Json
 template ID: "string"，
-status:"obsolte" \ "store"
+status:"delete" \ "save"
 ````
 
 response Body:
@@ -96,25 +96,6 @@ data:[{"templateUd":"xxx"},{"templateUd":"xxx"}]
 ````
 
 
-
-### api/case/delete
-
-specification: 用户删除已存在的模板信息
-
-method:  POST
-
-request Body:
-
-````shell
-Json
-template_id:"xxx"
-````
-
-response body
-
-````shell
-ok!
-````
 
 
 
