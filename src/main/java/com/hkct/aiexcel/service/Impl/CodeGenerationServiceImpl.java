@@ -34,9 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -108,7 +106,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(classPath);
 
-            logger.info("Class path inserted: {}", classPath);
+            logger.info("Class path : {}, ClassName: {}", classPath,filePath);
             // 使用新的类加载器加载类
             CtClass ctClass = pool.get(filePath);
             ClassLoader classLoader = new java.net.URLClassLoader(new java.net.URL[]{new java.io.File(classPath).toURI().toURL()});
@@ -271,16 +269,27 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
     public String reGen(FileUploadRequest request) throws Exception {
         String templateId = request.getTemplate_id();
         ExcelRecord excelRecord = excelRecordMapper.selectByPrimaryKey(templateId);
-
         String compliedClassPath = excelRecord.getCompliedClassPath();
-
         int slashIndex = compliedClassPath.lastIndexOf("/");
         String classPath = compliedClassPath.substring(0, slashIndex);
         String className = compliedClassPath.substring(slashIndex + 1);
 
+        MultipartFile multipartFile = request.getFile();
+        File destFile = new File("./excel_file","latest_10min_wind.xlsx");
+        try (InputStream inputStream = multipartFile.getInputStream();
+             FileOutputStream outputStream = new FileOutputStream(destFile)) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            System.out.println("文件保存成功: " + destFile.getAbsolutePath());
+        }
+
+
         loadClassAndGebExcel(classPath, className);
 
-        return "./excel_file/output.xlsx";
+        return excelRecord.getOutputExcelPath();
 
 
     }

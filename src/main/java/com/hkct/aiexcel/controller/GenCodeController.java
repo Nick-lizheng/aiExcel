@@ -68,22 +68,31 @@ public class GenCodeController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PostMapping(value = PathConstants.SELECT_EXCEL)
     public ResponseEntity<List<ExcelRecord>> selectTemplate(@RequestBody ExcelRecord request) throws Exception {
         try {
             List<ExcelRecord> record = codeGenerationService.selectTemplate(request);
             return new ResponseEntity<>(record, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);       }
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    // @PostMapping(PathConstants.RE_GEN)
-    // public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
-    //     String path = codeGenerationService.reGen(request);
-    //
-    //
-    //
-    //     return new ResponseEntity<>(text, HttpStatus.OK);
-    // }
+    @PostMapping(value =PathConstants.RE_GEN, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
+        String path = codeGenerationService.reGen(request);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=output.xlsx");
+        headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+        InputStreamResource resource =
+                new InputStreamResource(new BufferedInputStream(new FileInputStream(path)));
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
 
 }
