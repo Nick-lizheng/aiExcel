@@ -24,18 +24,20 @@ public class StatusServiceImpl implements StatusService {
 
     public String updateStatus(String templateId, String status) throws Exception {
         logger.info("************************************* Start to update status *************************************");
+        ExcelRecord selectByPrimaryKey;
+        try {
 
-        ExcelRecord selectByPrimaryKey = excelRecordMapper.selectByPrimaryKey(templateId);
+            selectByPrimaryKey = excelRecordMapper.selectByPrimaryKey(templateId);
+            selectByPrimaryKey.setStatus(status);
+            int statusCode = excelRecordMapper.updateStatus(selectByPrimaryKey);
+            logger.info("************************************* End to update status *************************************");
+            return String.valueOf(statusCode);
 
-        selectByPrimaryKey.setStatus(status);
+        } catch (Exception e) {
 
-        int statusCode = excelRecordMapper.updateStatus(selectByPrimaryKey);
+            logger.info("no record for excel, return a default value");
+            return "no record for excel";
 
-        logger.info("************************************* End to update status *************************************");
-
-
-        return String.valueOf(statusCode);
-
-
+        }
     }
 }
