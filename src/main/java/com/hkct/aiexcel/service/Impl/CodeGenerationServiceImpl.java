@@ -82,17 +82,26 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         String fileName = PromptConstants.PROMPT + ".java";
         String filePathName = "./gen_src_code/"+fileName;
         saveJavaCodeToFile(javaCode, "./gen_src_code/", fileName);
+
+        //step1:上传java code 到oss
+        CommonOssUtils.initializeClient();
         CommonOssUtils.saveJavaCodeToOss(javaCode, fileName);
         logger.info("************************************* End to generate code *************************************");
-
         logger.info("compile java file");
+        // Compile the Java code to a class file
         JavaToClassFile.compileToClassFile(filePathName);
         logger.info("load class and run to generate excel");
         String excelResponse = loadClassAndGebExcel("./gen_src_code", PromptConstants.PROMPT);
-        //step1:上传到oss
+        System.out.println(excelResponse);
+        //step2:上传本地生成的excel到oss
         CommonOssUtils.uploadFileFromLocal(PromptConstants.OUTPUT_EXCEL_PATH, PromptConstants.EXCEL_NAME);
-        //step2:返回下载链接
+        //step3:返回下载链接
         String ossDownloadPath = CommonOssUtils.downloadFile(PromptConstants.EXCEL_NAME);
+//        CommonOssUtils.shutdownClient();
+
+
+
+        // Save the record to the database
         ExcelRecord excelRecord = new ExcelRecord();
         String id = IdUtil.fastUUID();
         excelRecord.setId(id);
@@ -105,7 +114,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return SubmitRespones.builder()
                 .message(text)
                 .template_id(id)
-                .excelResponse(ossDownloadPath)
+                .outputFileUrl(ossDownloadPath)
                 .build();
     }
     public String loadClassAndGebExcel(String classPath,String filePath) throws Exception {
@@ -355,4 +364,11 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
 
     }
+
+//    public static void main(String[] args) {
+//        CommonOssUtils.uploadFileFromLocal("./excel_file/output10.xlsx","output10.xlsx");
+//        String s = CommonOssUtils.downloadFile("output10.xlsx");
+//        System.out.println(s);
+//
+//    }
 }

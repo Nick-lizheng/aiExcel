@@ -23,6 +23,7 @@ response Body:
 outputFileUrl: "String"
 template_id: "string"
 message: "string"
+isNewConversation: "boolean" //是否是新的会话 不传任何东西的话,默认是flase,如果是true的话,会清空之前的会话记录.
 ````
 
 

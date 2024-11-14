@@ -14,20 +14,38 @@ import java.net.URL;
 @Slf4j
 public class CommonOssUtils {
 
+    private static OSS ossClient;
+
+    // Initialize the OSS client
+    public static void initializeClient() {
+        if (ossClient == null) {
+            ossClient = new OSSClientBuilder().build(CredentialConstants.END_POINT, CredentialConstants.ACCESS_KEY_ID,  CredentialConstants.ACCESS_KEY_SECRET);
+        }
+    }
+
+    // Shutdown the OSS client
+    public static void shutdownClient() {
+        if (ossClient != null) {
+            ossClient.shutdown();
+        }
+    }
+
     // 使用阿里云的AccessKey ID 和 AccessKey Secret 创建凭证提供器
-    public static CredentialsProvider credentialsProvider = new DefaultCredentialProvider(
-            CredentialConstants.ACCESS_KEY_ID,
-            CredentialConstants.ACCESS_KEY_SECRET
-    );
+//    public static CredentialsProvider credentialsProvider = new DefaultCredentialProvider(
+//            CredentialConstants.ACCESS_KEY_ID,
+//            CredentialConstants.ACCESS_KEY_SECRET
+//    );
 
     // 创建 OSS 客户端对象
-    public static OSS ossClient = new OSSClientBuilder().build(
-            CredentialConstants.END_POINT,
-            credentialsProvider
-    );
+//    public static OSS ossClient = new OSSClientBuilder().build(
+//            CredentialConstants.END_POINT,
+//            credentialsProvider
+//    );
 
 
     public static String uploadFileFromLocal(String localFilePath,String objectName) {
+
+        initializeClient();
         // 创建文件对象
         File file = new File(localFilePath);
         if (!file.exists()) {
@@ -55,7 +73,7 @@ public class CommonOssUtils {
             log.error("Error Message:" + e.getMessage());
         } finally {
             if (ossClient != null) {
-                ossClient.shutdown();
+//                ossClient.shutdown();
             }
         }
     }
@@ -67,6 +85,7 @@ public class CommonOssUtils {
      * @param objectName
      */
     public static void saveJavaCodeToOss(String javaCode, String objectName) {
+        initializeClient();
         // can change this bucketName
         String bucketName = "ai-excel";
         // create OSS client
@@ -84,7 +103,7 @@ public class CommonOssUtils {
             e.printStackTrace();
         } finally {
             // Close OSS client
-            ossClient.shutdown();
+//            ossClient.shutdown();
         }
     }
 
@@ -93,6 +112,7 @@ public class CommonOssUtils {
      */
     public static String downloadFile(String objectName) {
         // Bucket 名称
+        initializeClient();
         String bucketName = "ai-excel";
 
         // 生成预签名 URL
