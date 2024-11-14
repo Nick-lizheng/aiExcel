@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.config.ClientConfig;
+import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.service.CodeGenerationService;
 import com.hkct.aiexcel.utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
@@ -37,10 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,10 +54,10 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
     public SubmitRespones generateAndSaveCode(String markdown, String message) throws Exception {
         logger.info("************************************* Start to generate code *************************************");
-        PromptConstants.PROMPT = updateExcelName();
-        System.out.println("print for user prompt: "+PromptConstants.PROMPT);
-
-        GenerationResult code = generateCode(markdown, message);
+        Map<String, String> map = updateExcelName();
+        PromptConstants.PROMPT = map.get("path");
+        PromptConstants.EXCEL_NAME = map.get("outputPath");
+        GenerationResult code = generateCode(markdown, message, PromptConstants.EXCEL_NAME);
 
         String content = code.getOutput().getChoices().get(0).getMessage().getContent();
         logger.info(content);
@@ -90,7 +88,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         String id = IdUtil.fastUUID();
         excelRecord.setId(id);
         excelRecord.setCompliedClassPath("./gen_src_code/"+PromptConstants.PROMPT);
-        System.out.println(new Date());
+        excelRecord.setOutputExcelPath(PromptConstants.OUTPUT_EXCEL_PATH);
         excelRecord.setCreateTimestamp(LocalDateTime.now());
         excelRecordMapper.insert(excelRecord);
 
@@ -124,7 +122,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
 
     }
 
-    private GenerationResult generateCode(String markdown, String message) throws NoApiKeyException, InputRequiredException {
+    private GenerationResult generateCode(String markdown, String message, String outputPath) throws NoApiKeyException, InputRequiredException {
         Generation gen = new Generation();
         com.alibaba.dashscope.utils.Constants.apiKey = CredentialConstants.APIKEY;
 
@@ -133,10 +131,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
                 .content(PromptConstants.SYSTEM_PROMPT)
                 .build();
 
-        Message userMsg = Message.builder()
-                .role(Role.USER.getValue())
-                .content(markdown + message + PromptConstants.getUserPrompt())
-                .build();
+        Message userMsg = userMsgFunction(markdown, message, outputPath);
 
         GenerationParam param = GenerationParam.builder()
                 .apiKey(com.alibaba.dashscope.utils.Constants.apiKey)
@@ -148,29 +143,76 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return gen.call(param);
     }
 
-    private String updateExcelName() {
+    private Message userMsgFunction(String markdown, String message, String outputPath) {
+        PromptConstants.OUTPUT_EXCEL_PATH = PathConstants.OUTPUT_EXCEL_PATH + outputPath;
+        System.out.println(PromptConstants.getUserPrompt());
+        Message userMsg = Message.builder()
+                .role(Role.USER.getValue())
+                .content(markdown + message + PromptConstants.getUserPrompt())
+                .build();
+        return userMsg;
+    }
+
+    private Map<String, String> updateExcelName() {
+        HashMap<String, String> map = new HashMap<>();
+        List<ExcelRecord> record = getSortedExcelRecords();
+
+        if (CollectionUtils.isEmpty(record)) {
+            map.put("path", "ExcelModifier1");
+            map.put("outputPath", "output1.xlsx");
+            return map;
+        }
+
+        String fileName = getIncrementedFileName(record.get(0).getCompliedClassPath(), "E");
+        String outputFileName = getIncrementedFileName(record.get(0).getOutputExcelPath(), "o");
+
+        map.put("path", fileName);
+        map.put("outputPath", outputFileName);
+        return map;
+    }
+
+    private List<ExcelRecord> getSortedExcelRecords() {
         LambdaQueryWrapper<ExcelRecord> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.orderByDesc(ExcelRecord::getCreateTimestamp);
-        List<ExcelRecord> record = excelRecordMapper.selectList(queryWrapper);
-        if (CollectionUtils.isEmpty(record)){
-            return "ExcelModifier1";
-        }
-        String fileName =  record.get(0).getCompliedClassPath().substring(record.get(0).getCompliedClassPath().lastIndexOf("E"));
-        String regex = "(\\D*)(\\d+)$"; // 匹配结尾的数字部分，\\D*表示非数字部分，\\d+表示数字部分
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(fileName);
+        return excelRecordMapper.selectList(queryWrapper);
+    }
 
-        if (matcher.find()) {
-            // 获取非数字部分
-            String prefix = matcher.group(1);
-            // 获取数字部分并递增
-            int number = Integer.parseInt(matcher.group(2)) + 1;
-            // 返回递增后的字符串
-            return prefix + number;
-        } else {
-            // 如果没有找到数字，直接返回原始字符串
+    private String getIncrementedFileName(String path, String delimiter) {
+        //提取文件名
+        String fileName = extractFileName(path, delimiter);
+        //根据字母获取文件名
+        return incrementFileName(fileName);
+    }
+
+    private String extractFileName(String path, String delimiter) {
+        int index = path.lastIndexOf(delimiter);
+        // 获取文件名和扩展名
+        String fileName = index == -1 ? path : path.substring(index);
+        return fileName;
+    }
+
+    private String incrementFileName(String fileName) {
+        if(fileName.charAt(0) == 'E'){
+            String regex = "(\\D*)(\\d+)$";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(fileName);
+             if (matcher.find()) {
+                 String prefix = matcher.group(1);
+                 int number = Integer.parseInt(matcher.group(2)) + 1;
+                 return prefix+number;
+             }
+        }
+        else {
+            Matcher matcher = Pattern.compile("(\\D*)(\\d+)(\\.\\w+)$").matcher(fileName);
+            if (matcher.find()) {
+                String prefix = matcher.group(1);
+                int number = Integer.parseInt(matcher.group(2)) + 1;
+                String extension = matcher.group(3);
+                return prefix + number + extension;
+            }
             return fileName;
         }
+        return null;
     }
 
     private String saveJavaCodeToFile(String javaCode, String path, String fileName) {

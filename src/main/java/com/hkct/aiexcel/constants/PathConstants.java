@@ -13,7 +13,7 @@ public class PathConstants {
 
     //for Excel output path
 //    public static final String OUTPUT_EXCEL_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "hackathon" + File.separator + "excelSource" + File.separator + "output.xlsx";
-    public static final String OUTPUT_EXCEL_PATH = "./excel_file/output.xlsx";
+    public static final String OUTPUT_EXCEL_PATH = "./excel_file/";
 
 
 
