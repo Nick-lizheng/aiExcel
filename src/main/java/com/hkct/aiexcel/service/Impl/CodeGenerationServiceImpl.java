@@ -108,6 +108,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         excelRecord.setCompliedClassPath("./gen_src_code/"+PromptConstants.PROMPT);
         excelRecord.setOutputExcelPath(PromptConstants.OUTPUT_EXCEL_PATH);
         excelRecord.setCreateTimestamp(LocalDateTime.now());
+        excelRecord.setStatus("1");
         excelRecordMapper.insert(excelRecord);
 
 
