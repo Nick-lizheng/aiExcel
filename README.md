@@ -1,7 +1,8 @@
-# Hackathon Project
+# Hackathon Project --AiExcel
 
 ## Repository URL
 https://github.com/Nick-lizheng/aiExcel
+https://github.com/Nick-lizheng/aiExcel_FE
 
 ## Introduction
 This project leverages the Tongyi Qianwen large model to generate code for manipulating Excel files based on user instructions and returns the required Excel file to the user. The project is built using Java, Spring Boot, and Maven, and it follows a modular structure to ensure maintainability and scalability.
@@ -28,11 +29,12 @@ This project leverages the Tongyi Qianwen large model to generate code for manip
   - `SubmitRespones.java`: Model class for the response of the code generation process.
 
 ### Primary Functionalities
-- **Excel to Markdown Conversion**: Converts uploaded Excel files to Markdown format.
-- **Code Generation**: Generates Java code from the Markdown content.
-- **Java Code Compilation**: Compiles the generated Java code into class files.
+- **Excel to Markdown Conversion**: Converts uploaded Excel files to Markdown format using the aliyun DocMind API.
+- **Code Generation**: According user prompt to generates Java code from the Markdown content using the Qwen-plus API.
+- **Java Code Compilation**: Compiles the dynamic generated Java code into class files.
 - **Excel Modification**: Executes the compiled Java code to modify the Excel files.
-- **Database Operations**: Stores records of processed Excel files in a database.
+- **Apply Java to Other Excel Template**: Executes the compiled Java code to modify other similar Excel files.
+- **Database Operations**: Stores records of processed Excel files in a database and OSS driver.
 
 ## API Endpoints
 
@@ -78,12 +80,3 @@ This project leverages the Tongyi Qianwen large model to generate code for manip
 - **Response Body**:
   - `Json`
     - `data`: [{"templateUd": "xxx"}, {"templateUd": "xxx"}]
-
-### `api/case/delete`
-- **Specification**: Users delete existing template information.
-- **Method**: POST
-- **Request Body**:
-  - `Json`
-    - `template_id`: "xxx"
-- **Response Body**:
-  - `ok!`
