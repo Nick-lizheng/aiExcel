@@ -20,6 +20,7 @@ instruction:"string"
 response Body:
 
 ````shell
+outputFileUrl: "String"
 template_id: "string"
 message: "string"
 ````
@@ -36,7 +37,7 @@ request Body:
 
 ````shell
 Json
-template ID: "string"，
+templateId: "string",
 status:"delete" \ "save"
 ````
 

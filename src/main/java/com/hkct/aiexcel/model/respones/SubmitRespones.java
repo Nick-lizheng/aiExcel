@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class SubmitRespones {
 
 
+    private String outputFileUrl;
     private String template_id;
     private String message;
     private String excelResponse;

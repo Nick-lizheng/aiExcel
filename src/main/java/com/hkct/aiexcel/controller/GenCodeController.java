@@ -3,6 +3,7 @@ package com.hkct.aiexcel.controller;
 
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
 import com.hkct.aiexcel.constants.PathConstants;
+import com.hkct.aiexcel.constants.PromptConstants;
 import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
@@ -62,14 +63,14 @@ public class GenCodeController {
             logger.info("************************************* End to import excel *************************************");
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachment; filename=output.xlsx");
+            headers.add("Content-Disposition", "attachment; filename="+ PromptConstants.EXCEL_NAME);
             headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
             headers.add("template_id", text.getTemplate_id());
             headers.add("excelResponse", URLEncoder.encode(text.getMessage(), StandardCharsets.UTF_8.toString()));
 
 
             InputStreamResource resource =
-                    new InputStreamResource(new BufferedInputStream(new FileInputStream("./excel_file/output.xlsx")));
+                    new InputStreamResource(new BufferedInputStream(new FileInputStream(PromptConstants.OUTPUT_EXCEL_PATH)));
 
             return ResponseEntity.ok()
                     .headers(headers)
