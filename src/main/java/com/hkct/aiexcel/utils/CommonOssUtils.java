@@ -8,17 +8,58 @@ import com.aliyun.oss.model.*;
 import com.hkct.aiexcel.constants.CredentialConstants;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URL;
 
 @Slf4j
 public class CommonOssUtils {
 
-    public static CredentialsProvider credentialsProvider = new DefaultCredentialProvider(CredentialConstants.ACCESS_KEY_ID, CredentialConstants.ACCESS_KEY_SECRET);
+    private static OSS ossClient;
 
-    public static OSS ossClient = new OSSClientBuilder().build(CredentialConstants.END_POINT, credentialsProvider);
+    // Initialize the OSS client
+    public static void initializeClient() {
+        if (ossClient == null) {
+            ossClient = new OSSClientBuilder().build(CredentialConstants.END_POINT, CredentialConstants.ACCESS_KEY_ID,  CredentialConstants.ACCESS_KEY_SECRET);
+        }
+    }
+
+    // Shutdown the OSS client
+    public static void shutdownClient() {
+        if (ossClient != null) {
+            ossClient.shutdown();
+        }
+    }
+
+    // 使用阿里云的AccessKey ID 和 AccessKey Secret 创建凭证提供器
+//    public static CredentialsProvider credentialsProvider = new DefaultCredentialProvider(
+//            CredentialConstants.ACCESS_KEY_ID,
+//            CredentialConstants.ACCESS_KEY_SECRET
+//    );
+
+    // 创建 OSS 客户端对象
+//    public static OSS ossClient = new OSSClientBuilder().build(
+//            CredentialConstants.END_POINT,
+//            credentialsProvider
+//    );
+
+
+    public static String uploadFileFromLocal(String localFilePath,String objectName) {
+
+        initializeClient();
+        // 创建文件对象
+        File file = new File(localFilePath);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("文件不存在: " + localFilePath);
+        }
+        String bucketName = "ai-excel";
+
+        // 上传文件到 OSS
+        ossClient.putObject(new PutObjectRequest(bucketName, objectName, file));
+        // 生成文件的访问 URL
+        String fileUrl = "https://" + bucketName + "." + CredentialConstants.END_POINT + "/" + objectName;
+        return fileUrl;
+    }
+
 
     /**
      * if you need create a new bucket, you can use this function
@@ -32,7 +73,7 @@ public class CommonOssUtils {
             log.error("Error Message:" + e.getMessage());
         } finally {
             if (ossClient != null) {
-                ossClient.shutdown();
+//                ossClient.shutdown();
             }
         }
     }
@@ -44,6 +85,7 @@ public class CommonOssUtils {
      * @param objectName
      */
     public static void saveJavaCodeToOss(String javaCode, String objectName) {
+        initializeClient();
         // can change this bucketName
         String bucketName = "ai-excel";
         // create OSS client
@@ -61,44 +103,25 @@ public class CommonOssUtils {
             e.printStackTrace();
         } finally {
             // Close OSS client
-            ossClient.shutdown();
+//            ossClient.shutdown();
         }
     }
 
     /**
      * downloadFileFromOss
      */
-    public static void downloadFile() {
-        // write bucketName
-        String bucketName = "java-hello-world";
-        // 填写Object完整路径，需要包含文件名，但不用包含Bucket名称
-        String objectName = "test/test.txt";
+    public static String downloadFile(String objectName) {
+        // Bucket 名称
+        initializeClient();
+        String bucketName = "ai-excel";
 
-        try {
-            // Calling ossClient.getObject returns an OSSObject instance, which contains the file content and file metadata.
-            OSSObject ossObject = ossClient.getObject(bucketName, objectName);
+        // 生成预签名 URL
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, objectName);
+        request.setExpiration(java.util.Date.from(java.time.Instant.now().plusSeconds(3600)));
 
-            // The file input stream can be obtained by calling ossObject.getObjectContent, and its content can be read from this input stream.
-            InputStream content = ossObject.getObjectContent();
-
-            if (content != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-                while (true) {
-                    String line = reader.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    log.info("\n" + line);
-                }
-                // close
-                content.close();
-            }
-        } catch (Exception e) {
-            log.error("Error Message:" + e.getMessage());
-        } finally {
-            if (ossClient != null) {
-                ossClient.shutdown();
-            }
-        }
+        // 获取生成的 URL
+        URL url = ossClient.generatePresignedUrl(request);
+        System.out.println(url);
+        return url.toString();
     }
 }
