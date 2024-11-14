@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.config.ClientConfig;
 import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.service.CodeGenerationService;
+import com.hkct.aiexcel.utils.CommonOssUtils;
 import com.hkct.aiexcel.utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
@@ -77,18 +78,21 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         } else {
             logger.error("No Java code found in the generated content.");
         }
-//        CommonOssUtils.saveJavaCodeToOss(javaCode, objectName);
         // Save Java code to a file
         String fileName = PromptConstants.PROMPT + ".java";
         String filePathName = "./gen_src_code/"+fileName;
         saveJavaCodeToFile(javaCode, "./gen_src_code/", fileName);
+        CommonOssUtils.saveJavaCodeToOss(javaCode, fileName);
         logger.info("************************************* End to generate code *************************************");
 
         logger.info("compile java file");
         JavaToClassFile.compileToClassFile(filePathName);
         logger.info("load class and run to generate excel");
         String excelResponse = loadClassAndGebExcel("./gen_src_code", PromptConstants.PROMPT);
-
+        //step1:上传到oss
+        CommonOssUtils.uploadFileFromLocal(PromptConstants.OUTPUT_EXCEL_PATH, PromptConstants.EXCEL_NAME);
+        //step2:返回下载链接
+        String ossDownloadPath = CommonOssUtils.downloadFile(PromptConstants.EXCEL_NAME);
         ExcelRecord excelRecord = new ExcelRecord();
         String id = IdUtil.fastUUID();
         excelRecord.setId(id);
@@ -101,7 +105,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         return SubmitRespones.builder()
                 .message(text)
                 .template_id(id)
-                .excelResponse(excelResponse)
+                .excelResponse(ossDownloadPath)
                 .build();
     }
     public String loadClassAndGebExcel(String classPath,String filePath) throws Exception {
@@ -177,7 +181,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
             map.put("path", "ExcelModifier1");
             map.put("outputPath", "output1.xlsx");
             return map;
-        }
+        }      
 
         String fileName = getIncrementedFileName(record.get(0).getCompliedClassPath(), "E");
         String outputFileName = getIncrementedFileName(record.get(0).getOutputExcelPath(), "o");
