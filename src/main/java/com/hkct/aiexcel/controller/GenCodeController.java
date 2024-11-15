@@ -1,14 +1,12 @@
 package com.hkct.aiexcel.controller;
 
 
-import com.alibaba.dashscope.aigc.generation.GenerationResult;
 import com.hkct.aiexcel.constants.PathConstants;
-import com.hkct.aiexcel.constants.PromptConstants;
+
 import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
-import com.hkct.aiexcel.utils.CommonOssUtils;
-import org.bouncycastle.util.test.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -24,13 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -49,6 +43,20 @@ public class GenCodeController {
         logger.info("************************************* Start to import excel *************************************");
         MultipartFile file = request.getFile();
 
+        // save excel file in local path
+        MultipartFile multipartFile = request.getFile();
+        File destFile = new File("./excel_file",multipartFile.getOriginalFilename());
+        try (InputStream inputStream = multipartFile.getInputStream();
+             FileOutputStream outputStream = new FileOutputStream(destFile)) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            System.out.println("文件保存成功: " + destFile.getAbsolutePath());
+        }
+
+
         String message = request.getInstruction();
         String markdown;
         try {
@@ -61,18 +69,9 @@ public class GenCodeController {
 
 
             // markdown to code
-            SubmitRespones text = codeGenerationService.generateAndSaveCode(markdown, message,request.isNewConversation());
+            SubmitRespones text = codeGenerationService.generateAndSaveCode(markdown, message, request.isNewConversation());
             logger.info("************************************* End to import excel *************************************");
 
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.add("Content-Disposition", "attachment; filename="+ PromptConstants.EXCEL_NAME);
-//            headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
-//            headers.add("template_id", text.getTemplate_id());
-//            headers.add("excelResponse", text.getMessage());
-//
-//
-//            InputStreamResource resource =
-//                    new InputStreamResource(new BufferedInputStream(new FileInputStream(PromptConstants.OUTPUT_EXCEL_PATH)));
             return ResponseEntity.ok()
                     .body(text);
 
@@ -91,16 +90,15 @@ public class GenCodeController {
         }
     }
 
-    @PostMapping(value =PathConstants.RE_GEN, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> reGenExcel(FileUploadRequest request, HttpServletResponse response) throws Exception {
+    @PostMapping(value = PathConstants.RE_GEN, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> reGenExcel(@ModelAttribute FileUploadRequest request, HttpServletResponse response) throws Exception {
         String path = codeGenerationService.reGen(request);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=output.xlsx");
         headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
-        InputStreamResource resource =
-                new InputStreamResource(new BufferedInputStream(new FileInputStream(path)));
+        InputStreamResource resource = new InputStreamResource(new BufferedInputStream(new FileInputStream(path)));
 
         return ResponseEntity.ok()
                 .headers(headers)

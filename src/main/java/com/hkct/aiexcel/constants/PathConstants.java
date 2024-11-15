@@ -19,7 +19,7 @@ public class PathConstants {
 
     //api for /case/submit
     public static final String IMPORT_EXCEL = "/case/submit";
-    public static final String RE_GEN = "/case/reGen";
+    public static final String RE_GEN = "/case/generate";
 
     public static final String SELECT_EXCEL = "/case/list";
     public static final String STATUS = "/case/status";
