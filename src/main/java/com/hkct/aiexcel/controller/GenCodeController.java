@@ -6,9 +6,8 @@ import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
 import com.hkct.aiexcel.service.CodeGenerationService;
+import com.hkct.aiexcel.utils.CommonOssUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -89,16 +92,27 @@ public class GenCodeController {
 
         int slashIndex = path.lastIndexOf("/");
         String fileName = path.substring(slashIndex + 1);
+//        String directoryPath = path.substring(0, slashIndex + 1);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=" + fileName);
-        headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Content-Disposition", "attachment; filename=" + fileName);
+//        headers.add("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
-        InputStreamResource resource = new InputStreamResource(new BufferedInputStream(new FileInputStream(path)));
+//        InputStreamResource resource = new InputStreamResource(new BufferedInputStream(new FileInputStream(path)));
+
+
+        CommonOssUtils.uploadFileFromLocal(path, "Regen_" + fileName);
+
+        String ossDownloadPath = CommonOssUtils.downloadFile("Regen_" + fileName);
+
+        Map<String, String> regenResponse = new HashMap<>();
+
+
+        regenResponse.put("path", ossDownloadPath);
+
 
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(resource);
+                .body(regenResponse);
     }
 
 }

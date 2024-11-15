@@ -23,7 +23,8 @@ public class PromptConstants {
                         "3. Java的版本应为jdk1.8.0, Java代码的文件名应为" + PromptConstants.PROMPT + ".java, 所有代码都要公共类" + PromptConstants.PROMPT + "\n" +
                         "4. 生成的代码要避免在执行的时候出现Caused by: java.lang.IllegalStateException: Cannot get a STRING value from a NUMERIC cell这个错误。为此，请在读取单元格值时根据单元格类型进行处理。\n" +
                         "5. 生成的代码要避免在执行的时候出现Caused by: java.lang.NumberFormatException: For input string: \"N/A\"这个错误。为此，请确保在处理数据时将所有\"N/A\"替换为0。\n" +
-                        "6. 如果在实现过程中遇到任何问题或不确定的地方，请明确指出并提供可能的解决方案或建议。\n\n" +
+                        "6. 生成的代码要避免在执行的时候出现Caused by: java.lang.NumberFormatException: empty String这个错误。为此，请在解析数值前检查字符串是否为空。\n" +
+                        "7. 如果在实现过程中遇到任何问题或不确定的地方，请明确指出并提供可能的解决方案或建议。\n\n" +
                         "请基于上述要求生成详细的Java代码示例。如果还有其他特定需求或者偏好（例如使用特定库来处理Excel），请通过设置以下变量告知：\n" +
                         "- `${preferred_library_for_excel_handling}` (例如Apache POI, JXL等)\n" +
                         "- `${additional_requirements}` (如果有额外的需求或限制条件)";

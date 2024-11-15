@@ -12,6 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")  // 设置路径匹配模式
                 .allowedOrigins("*")  // 设置允许的前端域名
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .exposedHeaders("excelResponse", "template_id");  // 允许前端访问 excelResponse header
+                .exposedHeaders("excelResponse", "template_id", "content-disposition");  // 允许前端访问 excelResponse header
     }
 }
