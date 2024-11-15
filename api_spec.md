@@ -97,5 +97,23 @@ data:[{"templateUd":"xxx"},{"templateUd":"xxx"}]
 }
 ````
 
+request
+
+````shell
+{
+"template_id": "1"
+"name": "string"
+}
+````
+
+response
+
+````shell
+{
+    status: "ok"
+ 
+
+
+
 
 
