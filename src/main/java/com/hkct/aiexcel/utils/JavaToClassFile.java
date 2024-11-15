@@ -29,7 +29,7 @@ public class JavaToClassFile {
                 new File("./jar/poi-ooxml-5.2.3.jar"));
         Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(sourceFile));
 
-        String collect = list.stream().map(f -> f.getAbsolutePath()).collect(Collectors.joining(";"));
+        String collect = list.stream().map(f -> f.getAbsolutePath()).collect(Collectors.joining(":"));
         System.out.println(collect);
         Iterable<String> options = Arrays.asList(
                 "-d", "./gen_src_code", // designate the output path
