@@ -38,7 +38,7 @@ request Body:
 
 ````shell
 Json
-templateId: "string",
+template_id: "string",
 status:"delete" \ "save"
 ````
 
@@ -96,12 +96,6 @@ Json
 data:[{"templateUd":"xxx"},{"templateUd":"xxx"}]
 }
 ````
-
-
-
-
-
-
 
 
 
