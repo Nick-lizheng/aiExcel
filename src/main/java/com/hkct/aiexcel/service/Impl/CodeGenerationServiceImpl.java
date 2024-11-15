@@ -91,7 +91,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         // Compile the Java code to a class file
         JavaToClassFile.compileToClassFile(filePathName);
         logger.info("load class and run to generate excel");
-        String excelResponse = loadClassAndGebExcel("./gen_src_code", PromptConstants.PROMPT);
+        String excelResponse = loadClassAndGenExcel("./gen_src_code", PromptConstants.PROMPT);
         System.out.println(excelResponse);
         //step2:上传本地生成的excel到oss
         CommonOssUtils.uploadFileFromLocal(PromptConstants.OUTPUT_EXCEL_PATH, PromptConstants.EXCEL_NAME);
@@ -118,7 +118,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
                 .outputFileUrl(ossDownloadPath)
                 .build();
     }
-    public String loadClassAndGebExcel(String classPath,String filePath) throws Exception {
+    public String loadClassAndGenExcel(String classPath, String filePath) throws Exception {
         try {
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(classPath);
@@ -347,7 +347,7 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         String className = compliedClassPath.substring(slashIndex + 1);
 
         MultipartFile multipartFile = request.getFile();
-        File destFile = new File("./excel_file","latest_10min_wind.xlsx");
+        File destFile = new File("./excel_file",multipartFile.getOriginalFilename());
         try (InputStream inputStream = multipartFile.getInputStream();
              FileOutputStream outputStream = new FileOutputStream(destFile)) {
             byte[] buffer = new byte[1024];
@@ -359,17 +359,11 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         }
 
 
-        loadClassAndGebExcel(classPath, className);
+        loadClassAndGenExcel(classPath, className);
 
         return excelRecord.getOutputExcelPath();
 
 
     }
 
-//    public static void main(String[] args) {
-//        CommonOssUtils.uploadFileFromLocal("./excel_file/output10.xlsx","output10.xlsx");
-//        String s = CommonOssUtils.downloadFile("output10.xlsx");
-//        System.out.println(s);
-//
-//    }
 }
