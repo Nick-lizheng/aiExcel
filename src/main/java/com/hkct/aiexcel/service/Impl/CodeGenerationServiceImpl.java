@@ -18,16 +18,16 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hkct.aiexcel.config.ClientConfig;
-import com.hkct.aiexcel.constants.PathConstants;
-import com.hkct.aiexcel.service.CodeGenerationService;
-import com.hkct.aiexcel.utils.CommonOssUtils;
-import com.hkct.aiexcel.utils.JavaToClassFile;
 import com.hkct.aiexcel.constants.CredentialConstants;
+import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.constants.PromptConstants;
 import com.hkct.aiexcel.entity.ExcelRecord;
 import com.hkct.aiexcel.mapper.ExcelRecordMapper;
 import com.hkct.aiexcel.model.request.FileUploadRequest;
 import com.hkct.aiexcel.model.respones.SubmitRespones;
+import com.hkct.aiexcel.service.CodeGenerationService;
+import com.hkct.aiexcel.utils.CommonOssUtils;
+import com.hkct.aiexcel.utils.JavaToClassFile;
 import javassist.ClassPool;
 import javassist.CtClass;
 import org.slf4j.Logger;
@@ -39,9 +39,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -276,7 +278,17 @@ public class CodeGenerationServiceImpl implements CodeGenerationService {
         }
         QueryWrapper<ExcelRecord> wrapper = new QueryWrapper<>();
         wrapper.eq("status", request.getStatus());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         List<ExcelRecord> list = excelRecordMapper.selectList(wrapper);
+        list = list.stream()
+                .sorted(Comparator.comparing(ExcelRecord::getCreateTimestamp).reversed())
+                .peek(record -> {
+                    String fileName = record.getCompliedClassPath().substring(record.getCompliedClassPath().lastIndexOf("/") + 1);
+                    String formattedTimestamp = record.getCreateTimestamp().format(formatter);
+                    record.setCompliedClassPath(fileName + "  |   " + formattedTimestamp);
+                })
+                .collect(Collectors.toList());
         if(CollectionUtils.isEmpty(list)){
             return null;
         }
