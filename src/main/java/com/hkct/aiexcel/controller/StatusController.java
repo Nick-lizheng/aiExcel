@@ -1,17 +1,19 @@
 package com.hkct.aiexcel.controller;
 
 
-import com.hkct.aiexcel.service.StatusService;
 import com.hkct.aiexcel.constants.CommonConstants;
 import com.hkct.aiexcel.constants.PathConstants;
 import com.hkct.aiexcel.model.request.UpdateStatusRequest;
+import com.hkct.aiexcel.service.StatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +36,7 @@ public class StatusController {
 
 
         try {
-            String message = statusService.updateStatus(request.getTemplateId(), status);
+            String message = statusService.updateStatus(request.getTemplate_id(), status);
             logger.info("************************************* End to updateStatus *************************************");
 
             Map<String, String> responseMessage = new HashMap<>();
